@@ -53,8 +53,8 @@ def get_sql_table_columns(table_name):
     return columns
 
 def load_processed_data():
-
-    print("\nCommencing automated file ingestion pipeline.")
+    """Loads cleaned CSVs into SQLite, explicitly filtering columns to match the target schema schema."""
+    print("\n🚀 Commencing automated file ingestion pipeline...")
     engine = create_engine(f"sqlite:///{DB_PATH}")
     
     ingestion_map = [
@@ -69,7 +69,7 @@ def load_processed_data():
         file_path = os.path.join(processed_dir, file_name)
         
         if not os.path.exists(file_path):
-            print(f"Warning: Missing expected file {file_name}. Skipping")
+            print(f"Warning: Missing expected file {file_name}. Skipping...")
             continue
             
         df = pd.read_csv(file_path)
@@ -94,17 +94,17 @@ def load_processed_data():
         if 'transaction_date' in df.columns:
             df['transaction_date'] = pd.to_datetime(df['transaction_date']).dt.strftime('%Y-%m-%d')
             
+        
         expected_columns = get_sql_table_columns(table_name)
-
         final_columns = [col for col in df.columns if col in expected_columns]
         df = df[final_columns]
         
-        print(f"Ingesting {file_name} into SQL table '{table_name}'")
+        print(f"Ingesting {file_name} into SQL table '{table_name}'.")
         df.to_sql(table_name, con=engine, if_exists='append', index=False)
         
         db_count = pd.read_sql_query(f"SELECT COUNT(*) FROM {table_name}", engine).iloc[0, 0]
-        print(f" Bars Validation Check: Source CSV Rows = {len(df)} | Target SQL Table Rows = {db_count}")
-        print(f"Ingestion verification complete.\n")
+        print(f"Validation Check: Source CSV Rows = {len(df)} | Target SQL Table Rows = {db_count}")
+        print(f"SUCCESS: Ingestion verification complete.\n")
 
 if __name__ == "__main__":
     init_db()
