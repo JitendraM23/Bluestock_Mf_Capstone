@@ -24,9 +24,15 @@ def create_synthetic_personas(df):
                         df['gender'].astype(str)).str.upper().str.replace(" ", "")
     return df
 
+
 def run_etl():
     print("Starting ETL Process.")
-    db_path = 'bluestock_mf.db'
+    
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(script_dir, '../data/db/bluestock_mf.db')
+    
+    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    
     conn = sqlite3.connect(db_path)
 
     try:

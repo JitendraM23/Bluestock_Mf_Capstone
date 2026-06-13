@@ -1,13 +1,17 @@
 import pandas as pd
 import numpy as np
 import sqlite3
+import os 
 
 print("Finding up the best Recommender")
 
-conn = sqlite3.connect("bluestock_mf.db")
+script_dir = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(script_dir, "..", "data", "db", "bluestock_mf.db")
+
+conn = sqlite3.connect(db_path)
+
 df_funds = pd.read_sql_query("SELECT amfi_code, scheme_name, category FROM dim_fund", conn)
 df_nav = pd.read_sql_query("SELECT amfi_code, date, nav FROM fact_nav ORDER BY amfi_code, date", conn)
-
 print("Calculating Sharpe Ratios on the fly...")
 df_nav['daily_return'] = df_nav.groupby('amfi_code')['nav'].pct_change()
 

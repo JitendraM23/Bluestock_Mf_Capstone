@@ -3,9 +3,8 @@ import time
 import requests
 import pandas as pd
 
-
-RAW_DATA_DIR = os.path.join("data", "raw")
-
+script_dir = os.path.dirname(os.path.abspath(__file__))
+RAW_DATA_DIR = os.path.join(script_dir, "..", "data", "raw")
 
 TARGET_SCHEMES = {
     "125497": "HDFC_Top_100_Direct",
@@ -18,6 +17,8 @@ TARGET_SCHEMES = {
 
 def fetch_and_save_nav():
     print(" Starting Live API Data Fetching\n")
+    
+    os.makedirs(RAW_DATA_DIR, exist_ok=True)
     
     for amfi_code, fund_name in TARGET_SCHEMES.items():
         print(f"Fetching {fund_name} Code: {amfi_code}")
@@ -32,13 +33,13 @@ def fetch_and_save_nav():
                 nav_records = json_response.get("data", [])
                 
                 if nav_records:
-                   
                     dataf = pd.DataFrame(nav_records)
                     dataf['amfi_code'] = amfi_code
-                    file_name = f"{fund_name}:{amfi_code}.csv"
-                    file_path = os.path.join(RAW_DATA_DIR, file_name)
-                    dataf.to_csv(file_path, index=False)
                     
+                    file_name = f"{fund_name}_{amfi_code}.csv"
+                    file_path = os.path.join(RAW_DATA_DIR, file_name)
+                    
+                    dataf.to_csv(file_path, index=False)
                     print(f"Success! Saved {len(dataf)} rows to {file_name}\n")
                 else:
                     print(f"No data found inside the JSON for {fund_name}\n")
